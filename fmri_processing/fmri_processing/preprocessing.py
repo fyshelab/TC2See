@@ -52,13 +52,11 @@ def convert_dicom(folder, tmp_folder, regex_runs, regex_anat, throw_away_trs=5):
 			target = Path(tmp_folder) / "func"
 
 			# get the first 5 TRs to throw away
-			number = int(folder.name.split("_")[-1])
-			for i in range(throw_away_trs):
-				file = folder / f"IM-{number:04d}-{i + 1:04d}.dcm"
-				file2 = folder.parent / (folder.name + "_discard") / file.name
-				file2.parent.mkdir(parents=True, exist_ok=True)
-				# print(file, file.exists())
-				if file.exists():
+			for file in folder.iterdir():
+				tr = int(file.stem.split('-')[-1])
+				if tr <= throw_away_trs:
+					file2 = folder.parent / (folder.name + "_discard") / file.name
+					file2.parent.mkdir(parents=True, exist_ok=True)
 					rename_pairs.append([file, file2])
 
 		elif re.match(regex_anat, folder.name):
