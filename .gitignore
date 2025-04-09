@@ -1,5 +1,5 @@
 /DRAC_code/results/
 /DRAC_code/venv/
 /DRAC_code/data/
-/DRAC_code/fMRI_prep/fmriprep_23.2.3.sif
-/DRAC_code/fMRI_prep/fmriprep_24.0.0.sif
+/DRAC_code/data_preprocessing/fMRI_prep/fmriprep_23.2.3.sif
+/DRAC_code/data_preprocessing/fMRI_prep/fmriprep_24.0.0.sif
