@@ -74,8 +74,12 @@ def two_versus_two(distances, stimulus_ids=None):
     upper_triangle_ids = np.triu_indices(distances.shape[0], k=1)
     comparison = comparison[upper_triangle_ids]
 
+    print(len(upper_triangle_ids))
+    
+
     if stimulus_ids is not None:
         same_stimulus = stimulus_ids[None, :] == stimulus_ids[:, None]
+        print(same_stimulus.shape)
         same_stimulus = same_stimulus[upper_triangle_ids]
         comparison = comparison[~same_stimulus]
 

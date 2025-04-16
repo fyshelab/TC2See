@@ -1,75 +1,56 @@
 import os
 import sys
-import time
-from pprint import pprint
 from pathlib import Path
-from random import randint
 import traceback
-
 import numpy as np
 import pandas as pd
-# from ipywidgets import interact
-from tqdm import tqdm
-import nibabel as nib
-# import glmsingle
-# from glmsingle.glmsingle import GLM_single
 import bids
 from bids import BIDSLayout
-from scipy.ndimage import zoom, binary_dilation
+from scipy.ndimage import binary_dilation
 import h5py
-import nibabel as nib
-# from einops import rearrange
+
 
 dir2 = os.path.abspath('../..')
 dir1 = os.path.dirname(dir2)
 if not dir1 in sys.path: 
     sys.path.append(dir1)
-    
-from noise_ceiling import (
-    compute_ncsnr,
-    compute_nc,
-)
 
 from tc2see import load_data
 
-
-dataset_root = Path('../data')
+dataset_root = os.path.expanduser('~/projects/def-afyshe-ab/TC2See')
+james_root = Path(__file__).parent.parent.parent.parent.parent
 
 tc2see_version = 3 
-derivatives_path = dataset_root / 'processed/fmriprep_vols'
+derivatives_path = dataset_root + '/fmri_prep_vols_v2'
 num_runs = 6 if tc2see_version in (1, 3) else 8
 
 # Initialize BIDSLayouts for querying files.
-dataset_layout = BIDSLayout(dataset_root / 'raw_data/bids_data')
+dataset_layout = BIDSLayout(dataset_root + '/bids_data/TC2See')
 derivatives_layout = BIDSLayout(derivatives_path, derivatives=True, validate = False)
 
 task = "bird"
 space = 'T1w'
-subjects = ['35', '36', '37', '38', '39', '40'] #, '04'] # ['05', '06', '07'] # Subject ID to process data for
+subjects = ["05", "06", "07", "08", "09", "10", "11", "12", "14", "15", "16", "17", "18", "19",
+            "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35",
+            "36", "37", "38", "39", "40"] 
+
 tr = 2. #1.97 # TR duration (in seconds)
 mask_dilations = 3 # Number of dilation iterations for the brain mask
 num_stimuli = 75 #112  # Total number of different stimuli
-num_trs = 236 #231 #229  # Total number of TRs in the fMRI data
+
+# num_trs = 236 #231 #229  # Total number of TRs in the fMRI data
 
 # Load stimulus images and create a mapping of stimulus names to unique identifiers
-stimulus_images = h5py.File(dataset_root / 'stimulus-images.hdf5', 'r')
+stimulus_images = h5py.File(james_root / 'stimulus-images.hdf5', 'r')
 stimulus_id_map = {name: i for i, name in enumerate(stimulus_images.attrs['stimulus_names'])}
 
 # Create an HDF5 file to store preprocessed fMRI data
-with h5py.File(f'/home/jamesmck/scratch/fmri_processing/results/derivatives_TC2See/fmriprep/tc2see-v3-bold.hdf5', 'a') as f:
+with h5py.File(f'{dataset_root}/tc2see-v3-bold.hdf5', 'a') as f:
     for sub in subjects:
         if f'sub-{sub}' not in list(f.keys()):
             try:
                 group = f.require_group(f'sub-{sub}')
                 
-                # mask_image = derivatives_layout.get(
-                #     subject=sub,
-                #     run=1,
-                #     task=task,
-                #     space=space, 
-                #     desc='brain',
-                #     extension='nii.gz',
-                # )[0].get_image()
                 mask_image_files = derivatives_layout.get(
                     subject=sub,
                     run=1,
@@ -77,8 +58,15 @@ with h5py.File(f'/home/jamesmck/scratch/fmri_processing/results/derivatives_TC2S
                     space=space, 
                     extension='nii.gz'
                 )
+                
                 mask_image = [file for file in mask_image_files if "space-T1w_desc-brain_mask.nii.gz" in file.filename]
                 mask_image = mask_image[0].get_image()
+                
+                # Get the number of TRs from the reference BOLD image 
+                bold_ref = [file for file in mask_image_files if "space-T1w_desc-preproc_bold.nii.gz" in file.filename]
+                bold_ref = bold_ref[0].get_image()
+                num_trs = bold_ref.shape[3]
+
                 fmri_mask = mask_image.get_fdata().astype(bool)
                 fmri_mask = binary_dilation(fmri_mask, iterations=mask_dilations)
 
