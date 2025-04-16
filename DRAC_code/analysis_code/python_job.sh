@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=01:50:00
+#SBATCH --time=6:00:00
 #SBATCH --account=def-afyshe-ab
 #SBATCH  -n 1
 #SBATCH --cpus-per-task=8
@@ -17,4 +17,5 @@ echo $PYTHON_SCRIPT
 cd ..
 source venv/bin/activate
 cd analysis_code
+cd decoding
 python $PYTHON_SCRIPT
