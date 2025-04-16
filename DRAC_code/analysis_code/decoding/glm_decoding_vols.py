@@ -96,7 +96,7 @@ for subj in tqdm(subjs):
 
         bold_test = betas[test_run_id:test_run_id+1, :, :]  # Shape: (1, 75, 200258)
         bold_test = bold_test.reshape(bold_test.shape[1], bold_test.shape[2]) # Shape: (75, 200258)
-        stimulus_ids_test = stimulus_ids[test_run_id:test_run_id+1, :].reshape(-1)   # Shape: (1, 75)
+        stimulus_ids_test = stimulus_ids[test_run_id:test_run_id+1, :].reshape(-1)   # Shape: (75,)
         
         ncsnr = compute_ncsnr(bold_train, stimulus_ids_train) # Compute noise ceiling noise ratio
         nc = compute_nc(ncsnr, num_averages=1)
