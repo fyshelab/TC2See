@@ -55,7 +55,10 @@ def has_similar_expertise(subject1, subject2, threshold):
     return abs(score1 - score2) <= threshold
 
 
+##############################################################################
 # For each ROI, calculate correlations between subjects with similar expertise
+##############################################################################
+
 expertise_vs_rsa_correlation_similarity = {}
 matched_participants = {}
 adaptive_subgroup_rsa_results = {}
