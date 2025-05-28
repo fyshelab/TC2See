@@ -18,7 +18,7 @@ PARTICIPANTS=("05" "06" "07" "08" "09" "10" "11" "12" "14" "15" "16" "17" "18"
               "37" "38" "39" "40")
 
 sub_num=${PARTICIPANTS[$SLURM_ARRAY_TASK_ID]}
-
+ 
 cd
 module load apptainer
 
@@ -49,8 +49,8 @@ $SLURM_TMPDIR/image/fmriprep_24.0.0.sif \
 --participant-label ${sub_num} \
 --work-dir /work_dir \
 --fs-license-file /license/license.txt \
---output-spaces func \
+--output-spaces T1w \
 --stop-on-first-crash
 
 
-cp -r $SLURM_TMPDIR/sub_${sub_num}_vol_out ${shared_data_dir}/fmri_prep_vols/
+cp -r $SLURM_TMPDIR/sub_${sub_num}_vol_out ${shared_data_dir}/fmri_prep_vols_v2/

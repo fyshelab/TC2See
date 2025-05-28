@@ -18,12 +18,6 @@ from tc2see import load_data
 subjects = [ sub for sub in range(5,41) if sub not in [13]]
 subject_strs = [ '0'+str(sub) if sub < 10 else str(sub) for sub in subjects]
 
-# ROIs = {
-#     "FFC": [18],"V1": [1],"V2": [4],"V3": [5],"V3A": [13],"V3B": [19],"V3CD": [158],"V4": [6],"V6": [3],"V7": [16],
-#     "V8": [7], "VMV1": [153],"VMV2": [160],"VMV3": [154],"LO1": [20],"LO2": [21],"PIT": [22],"VVC": [163], "140": [140], "11":[11],
-#     "85": [85], "83":[83], "82": [82], "87": [87],
-# }
-
 ROIs = {
     "FFC": [18], "VVC": [163], "LO1": [20],"LO2": [21], "LO3": [159], "PHA1": [126], "PHA2": [155], "PHA3": [127], "IPS1": [17], "MT": [23]
 }

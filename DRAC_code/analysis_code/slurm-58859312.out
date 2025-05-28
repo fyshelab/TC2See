@@ -1,18 +1,0 @@
-glm_decoding_vols.py
-  0%|          | 0/1 [00:00<?, ?it/s]  0%|          | 0/1 [00:00<?, ?it/s]
-Traceback (most recent call last):
-  File "/project/6029407/jamesmck/TC2See/DRAC_code/analysis_code/decoding/glm_decoding_vols.py", line 38, in <module>
-    bold, stimulus_ids, mask, affine = load_data(
-                                       ^^^^^^^^^^
-  File "/project/6029407/jamesmck/TC2See/DRAC_code/analysis_code/decoding/tc2see.py", line 26, in load_data
-    stimulus_trs = group['stimulus_trs'][:]
-                   ~~~~~^^^^^^^^^^^^^^^^
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
-  File "/project/6029407/jamesmck/TC2See/DRAC_code/venv/lib/python3.11/site-packages/h5py/_hl/group.py", line 357, in __getitem__
-    oid = h5o.open(self.id, self._e(name), lapl=self._lapl)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
-  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
-  File "h5py/h5o.pyx", line 257, in h5py.h5o.open
-KeyError: "Unable to synchronously open object (object 'stimulus_trs' doesn't exist)"

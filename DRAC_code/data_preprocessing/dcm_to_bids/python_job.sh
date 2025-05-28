@@ -9,12 +9,13 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-type=REQUEUE
 #SBATCH --mail-type=ALL
-#SBATCH --array=0-33
+#SBATCH --array=0
 
 # Get the participant from the array
-PARTICIPANTS=("05" "06" "07" "08" "09" "10" "11" "12" "14" "15" "16" "17" "18" 
-              "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36"
-              "37" "38" "39" "40")
+# PARTICIPANTS=("05" "06" "07" "08" "09" "10" "11" "12" "14" "15" "16" "17" "18" 
+#               "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36"
+#               "37" "38" "39" "40")
+PARTICIPANTS=("40")
 
 PARTICIPANT=${PARTICIPANTS[$SLURM_ARRAY_TASK_ID]}
 
