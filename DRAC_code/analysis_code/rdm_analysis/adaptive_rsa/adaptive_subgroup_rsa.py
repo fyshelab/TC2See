@@ -12,7 +12,7 @@ dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 rdm_dist = "correlation"
-similarity_threshold = 1  # Expertise score difference threshold in percentage points
+similarity_threshold = 10  # Expertise score difference threshold in percentage points
 threshold_dir = results_dir / f'adaptive_rsa/{similarity_threshold}_percent'
 threshold_dir.mkdir(parents=True, exist_ok=True)
 
@@ -66,25 +66,16 @@ for ROI in ROIs:
         adaptive_subgroup_rsa_results[ROI] = {}
         
         for subject1 in all_subjects:
-            # if ROI not in RDM_dict[subject1] or subject1 not in expertise_scores:
-            #     continue
+            if ROI not in RDM_dict[subject1]:
+                continue
                 
             # Find subjects with similar expertise
             similar_expertise_correlations = []
             similar_expertise_subjects = []
             
             for subject2 in all_subjects:
-
-                # if (subject1 == subject2 or 
-                #     ROI not in RDM_dict[subject2] or 
-                #     subject2 not in expertise_scores or 
-                #     subject1 in matched_participants.get(subject2, [])):
-                #     continue
-
-                # if (subject1 == subject2 or 
-                #     ROI not in RDM_dict[subject2] or 
-                #     subject2 not in expertise_scores):
-                #     continue
+                if (subject1 == subject2 or ROI not in RDM_dict[subject2]):
+                    continue
                 
                 # Check if subjects have similar expertise
                 if has_similar_expertise(subject1, subject2, similarity_threshold):

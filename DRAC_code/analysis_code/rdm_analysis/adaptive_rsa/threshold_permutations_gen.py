@@ -67,15 +67,13 @@ for i in range(n_permutations):
             try:
                 subgroup_rdm_means = {}
                 for subject1 in all_subjects:
-                    # if roi not in RDM_dict[subject1] or subject1 not in shuffled_scores:
-                    #     continue
+                    if roi not in RDM_dict[subject1]:
+                        continue
 
                     similar_correlations = []
                     for subject2 in all_subjects:
-                        # if (subject1 == subject2 or
-                        #     roi not in RDM_dict[subject2] or
-                        #     subject2 not in shuffled_scores):
-                        #     continue
+                        if (subject1 == subject2 or ROI not in RDM_dict[subject2]):
+                            continue
 
                         if has_similar_expertise(subject1, subject2, threshold):
                             corr_val = rsatoolbox.rdm.compare(

@@ -68,8 +68,8 @@ for threshold in thresholds:
             diff_threshold_adaptive_subgroup_rsa_results = {}
             
             for subject1 in all_subjects:
-                # if roi not in RDM_dict[subject1] or subject1 not in expertise_scores:
-                #     continue
+                if roi not in RDM_dict[subject1]:
+                    continue
                     
                 # Find subjects with similar expertise
                 similar_expertise_correlations = []
@@ -77,10 +77,8 @@ for threshold in thresholds:
                 
                 for subject2 in all_subjects:
                     
-                    # if (subject1 == subject2 or 
-                    #     roi not in RDM_dict[subject2] or 
-                    #     subject2 not in expertise_scores):
-                    #     continue
+                    if (subject1 == subject2 or ROI not in RDM_dict[subject2]):
+                        continue
 
                     # Check if subjects have similar expertise using current threshold
                     if has_similar_expertise(subject1, subject2, threshold):
