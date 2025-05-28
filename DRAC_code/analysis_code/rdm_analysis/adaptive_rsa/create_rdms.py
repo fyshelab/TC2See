@@ -33,6 +33,7 @@ for subject in all_subjects:
                 rdm_path.mkdir(parents=True, exist_ok=True)
                 sub_roi_data = pd.read_parquet(roi_path / f'reps_for_{ROI}.parquet')
                 
+                # Stimulus IDs are sorted at this point, so we can use them in rdm correlations
                 if avg_duplicates:
                     sub_roi_data['stimulus_category'] = sub_roi_data['stimulus_category'].apply(lambda x: 1 if x == "Sparrow" else 2)
                     sub_roi_data = sub_roi_data.groupby('stimulus_id').mean().reset_index()
