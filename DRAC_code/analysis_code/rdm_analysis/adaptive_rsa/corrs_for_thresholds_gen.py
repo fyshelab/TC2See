@@ -9,9 +9,8 @@ dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 rdm_dist = "correlation"
-similarity_threshold = 10  # Expertise score difference threshold in percentage points
-lower, upper, step = 1, 20, 1
-thresholds = [num for num in range(lower, upper + 1, step)] 
+lower, upper, step = 1, 10, 1
+thresholds = list(range(lower, upper + 1, step))
 
 ROIs = ["V1", "V2", "V3", "V4", "V6", "V7", "V8", "LO1", "LO2", "PIT", "FFC", "VVC"]
 all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16', '17', 
