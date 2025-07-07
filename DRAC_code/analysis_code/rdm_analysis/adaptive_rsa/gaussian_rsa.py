@@ -24,6 +24,7 @@ if version == "":
     all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16', '17', 
                     '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
                     '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']
+    
 elif version == "no_sub_8_":
     all_subjects = ['05', '06', '07', '09', '10', '11', '12', '14', '15', '16', '17', 
                     '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
@@ -129,6 +130,7 @@ for ROI in ROIs:
         print("\n\n")
         continue
 
+
 results_df = pd.DataFrame(expertise_vs_rsa_correlation_similarity).T.reset_index()
 results_df = results_df.rename(columns={'index': 'ROI'})
 
@@ -161,48 +163,38 @@ with open(sigma_dir / f'{version}sigma_{sigma}_adaptive_subgroup_rsa_results.jso
 ##########################################################################################
     
 for corr_type in ["pearson", "spearman"]:
-    for regression_type in ["lr", "huber"]:
-        # rois_sorted_by_p = results_df.sort_values(by=f'{corr_type}_p')['ROI'].tolist()
-        rois_sorted_by_p = results_df['ROI'].tolist()
+    rois_sorted_by_p = results_df['ROI'].tolist()
 
 
-        plt.figure(figsize=(21, 12)) 
-        for i, roi in enumerate(rois_sorted_by_p):
-            valid_subjects = list(adaptive_subgroup_rsa_results[roi].keys())
-            x = [expertise_scores[subject] for subject in valid_subjects]
-            y = [adaptive_subgroup_rsa_results[roi][subject] for subject in valid_subjects]
-            
-            # Plot scatter with regression line
-            plt.subplot(3, 5, i+1)
-            plt.scatter(x, y, alpha=0.7)
-            
-            if regression_type == "lr":
-                slope, intercept, r_value, p_value, std_err = linregress(x, y)
-                x_line = np.linspace(min(x), max(x), 100)
-                y_line = slope * x_line + intercept
-                plt.plot(x_line, y_line, 'r-')
-            elif regression_type == "huber":
-                X = np.array(x).reshape(-1, 1)
-                y_array = np.array(y)
-                huber = HuberRegressor().fit(X, y_array)
-                x_line = np.linspace(min(x), max(x), 100)
-                y_line = huber.predict(x_line.reshape(-1, 1))
-                plt.plot(x_line, y_line, 'r-', label='Huber Fit')
+    plt.figure(figsize=(21, 12)) 
+    for i, roi in enumerate(rois_sorted_by_p):
+        valid_subjects = list(adaptive_subgroup_rsa_results[roi].keys())
+        x = [expertise_scores[subject] for subject in valid_subjects]
+        y = [adaptive_subgroup_rsa_results[roi][subject] for subject in valid_subjects]
+        
+        # Plot scatter with regression line
+        plt.subplot(3, 5, i+1)
+        plt.scatter(x, y, alpha=0.7)
+        
+        slope, intercept, r_value, p_value, std_err = linregress(x, y)
+        x_line = np.linspace(min(x), max(x), 100)
+        y_line = slope * x_line + intercept
+        plt.plot(x_line, y_line, 'r-')
 
-            plt.ylim(-0.02, 0.37)
-            plt.xlim(35, 90)
+        plt.ylim(-0.02, 0.37)
+        plt.xlim(35, 90)
 
-            plt.title(f'ROI {roi}')
-            plt.text(0.05, 0.95, 
-                    f'r = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_r"]:.3f}\np = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_p"]:.3f}\np_adj = {results_df.loc[results_df["ROI"] == roi, f"{corr_type}_p_corrected"].values[0]:.3f}',  
-                    transform=plt.gca().transAxes, verticalalignment='top')
-            plt.xlabel('Expertise Score')
-            plt.ylabel(f'Weighted Avg RDM Correlation ({corr_type})')
-            plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+        plt.title(f'ROI {roi}')
+        plt.text(0.05, 0.95, 
+                f'r = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_r"]:.3f}\np = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_p"]:.3f}\np_adj = {results_df.loc[results_df["ROI"] == roi, f"{corr_type}_p_corrected"].values[0]:.3f}',  
+                transform=plt.gca().transAxes, verticalalignment='top')
+        plt.xlabel('Expertise Score')
+        plt.ylabel(f'Weighted Avg RDM Correlation ({corr_type})')
+        plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
 
-        plt.suptitle(f'Expertise vs Weighted Average RDM Correlation\n(Gaussian σ = {sigma})', 
-                    fontsize=16, fontweight='bold', y=0.98)
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.92)  
-        print(f"Saving plot to {str(sigma_dir)}" + "\\" + f"{corr_type}_{regression_type}_{version}sigma_{sigma}_scatters.png")
-        plt.savefig(sigma_dir / f'{corr_type}_{regression_type}_{version}sigma_{sigma}_scatters.png', dpi=300)
+    plt.suptitle(f'Expertise vs Weighted Average RDM Correlation\n(Gaussian σ = {sigma})', 
+                fontsize=16, fontweight='bold', y=0.98)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.92)  
+    print(f"Saving plot to {str(sigma_dir)}" + "\\" + f"{corr_type}_{version}sigma_{sigma}_scatters.png")
+    plt.savefig(sigma_dir / f'{corr_type}_{version}sigma_{sigma}_scatters.png', dpi=300)
