@@ -5,9 +5,8 @@ from scipy.stats import spearmanr, pearsonr
 import json
 import traceback
 
-
-dataset_root = Path("D:/Documents/DRAC/TC2See/data")
-results_dir = Path("D:/Documents/DRAC/TC2See/results")
+dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
+results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 rdm_dist = "correlation"
 sigma_val = 5
@@ -68,8 +67,6 @@ def calculate_gaussian_weight(subject1, subject2, sigma):
 ####################################################################################################
 
 sigma_results = {}
-
-
 sigma_results[sigma_val] = {}
 
 expertise_vs_rsa_correlation_similarity = {}
@@ -136,5 +133,6 @@ for ROI in ROIs:
 
 # Save threshold_results dict as JSON
 sigmas_results_path = results_dir / data_dir / f'{sigma_val}{added_description}_{corr}_range_results.json'
+
 with open(sigmas_results_path, 'w') as f:
     json.dump(sigma_results, f, indent=4)

@@ -16,7 +16,9 @@ similarity_threshold = 10  # Expertise score difference threshold in percentage 
 threshold_dir = results_dir / f'adaptive_rsa/{similarity_threshold}_percent'
 threshold_dir.mkdir(parents=True, exist_ok=True)
 
-ROIs = ["V1", "V2", "V3", "V4", "V6", "V7", "V8", "LO1", "LO2", "PIT", "FFC", "VVC"]
+# ROIs = ["V1", "V2", "V3", "V4", "V6", "V7", "V8", "LO1", "LO2", "PIT", "FFC", "VVC"]
+ROIs = ["V1", "V2", "V3", "V4",  "V7", "V8", "LO1", "LO2", "PIT", "A1", "4", "Pir"]
+
 all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16', '17', 
                 '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
                 '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']

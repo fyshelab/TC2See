@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
-lower, upper, step = 1, 10, 1
+lower, upper, step = 1, 20, 1
 thresholds_to_permute = list(range(lower, upper + 1, step))
 rdm_dist = "correlation"
 n_permutations = 1000
@@ -19,7 +19,8 @@ all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16'
                 '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
                 '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']
 
-permutation_results = {roi: {thr: [] for thr in thresholds_to_permute} for roi in ROIs}
+permutation_results_r = {roi: {thr: [] for thr in thresholds_to_permute} for roi in ROIs}
+permutation_results_p = {roi: {thr: [] for thr in thresholds_to_permute} for roi in ROIs}
 
 # Load expertise scores
 with open(dataset_root / "participant_quiz_scores.json", 'r') as f:
@@ -91,12 +92,18 @@ for i in tqdm(range(n_permutations)):
                 shuffled_y = [subgroup_rdm_means[sub] for sub in valid_subjects]
                 
            
-                r, _ = pearsonr(shuffled_x, shuffled_y)
-                permutation_results[roi][threshold].append(r)
+                r, p = pearsonr(shuffled_x, shuffled_y)
+                permutation_results_r[roi][threshold].append(r)
+                permutation_results_p[roi][threshold].append(p)
 
             except Exception as e:
                 continue
 
-permutation_out_path = results_dir / f'adaptive_rsa/{lower}_{upper}_{step}_permutation_test_nulls.json'
-with open(permutation_out_path, 'w') as f:
-    json.dump(permutation_results, f)
+permutation_out_path_r = results_dir / f'adaptive_rsa/{lower}_{upper}_{step}_permutations_r.json'
+with open(permutation_out_path_r, 'w') as f:
+    json.dump(permutation_results_r, f)
+
+
+permutation_out_path_p = results_dir / f'adaptive_rsa/{lower}_{upper}_{step}_permutations_p.json'
+with open(permutation_out_path_p, 'w') as f:
+    json.dump(permutation_results_p, f)

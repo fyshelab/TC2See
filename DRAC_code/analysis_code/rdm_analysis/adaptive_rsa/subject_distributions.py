@@ -9,8 +9,8 @@ import json
 import traceback
 from matplotlib.ticker import FormatStrFormatter, MultipleLocator
 
-dataset_root = Path("D:/Documents/DRAC/TC2See/data")
-results_dir = Path("D:/Documents/DRAC/TC2See/results")
+dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
+results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 rdm_dist = "correlation"
 sigma = 5  # Gaussian decay parameter (expertise score units)
 sigma_dir = results_dir / f'gaussian/gaussian_sigma_{sigma}'

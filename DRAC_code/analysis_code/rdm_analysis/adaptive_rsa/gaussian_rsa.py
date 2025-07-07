@@ -10,8 +10,8 @@ import traceback
 from sklearn.linear_model import HuberRegressor
 from matplotlib.ticker import FormatStrFormatter
 
-dataset_root = Path("D:/Documents/DRAC/TC2See/data")
-results_dir = Path("D:/Documents/DRAC/TC2See/results")
+dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
+results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 rdm_dist = "correlation"
 version = "no_sub_8_" # "" or "no_sub_8_"
 
@@ -138,7 +138,6 @@ results_df['pearson_p_corrected'] = corrected_p_values_pearson
 
 _, corrected_p_values_spearman, _, _ = multipletests(results_df['spearman_p'], method='fdr_bh')
 results_df['spearman_p_corrected'] = corrected_p_values_spearman
-
 
 
 ########################################

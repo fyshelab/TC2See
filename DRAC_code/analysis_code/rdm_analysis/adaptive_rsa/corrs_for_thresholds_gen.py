@@ -51,9 +51,9 @@ def has_similar_expertise(subject1, subject2, threshold):
 
 
 
-##################################################################################################### 
-# Plot the correlation of expertise and similar RDM correlation relationship at different thresholds 
-##################################################################################################### 
+####################################################################################################
+# Save the correlation of expertise and similar RDM correlation relationship at different thresholds 
+####################################################################################################
 
 threshold_results = {}
 

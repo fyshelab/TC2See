@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import json
 
 
-dataset_root = Path("D:/Documents/DRAC/TC2See/data")
-results_dir = Path("D:/Documents/DRAC/TC2See/results")
+dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
+results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 sigma_val = "5"
 corr = 'gaussian'
@@ -55,8 +55,6 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig(results_dir / data_dir / f'sigma_{sigma_val}{added_description}_r_sigma_variations.png', dpi=300)
 
-
-
 ###############################################
 # Get p-values for different ROIs at each sigma 
 ###############################################
@@ -72,68 +70,7 @@ if permutation_data_available:
         p_val = (np.sum(np.array(null_distribution) >= observed_r) + 1) / (len(null_distribution) + 1)
         p_values[roi][sigma_val] = p_val
 
-
-
-#################################################################################
-# Plot average r value for each sigma and variance as shaded area around the line
-#################################################################################
-
-# if permutation_data_available:
-#     rois_to_plot = ROIs  
     
-#     plt.figure(figsize=(12, 8))
-    
-#     colors = plt.cm.tab10(np.linspace(0, 1, len(rois_to_plot)))  # Generate distinct colors
-    
-#     for i, roi in enumerate(rois_to_plot):
-#         sigmas_with_data = []
-#         mean_correlations = []
-#         std_correlations = []
-        
-#         for sigma in sigmas_to_permute:
-#             if (sigma in permutation_results.get(roi, {}) and 
-#                 sigma in sigma_corr_results and 
-#                 roi in sigma_corr_results[sigma]):
-                
-#                 sigmas_with_data.append(int(sigma))  # Convert to int for plotting
-                
-#                 # Get null distribution for this ROI and sigma
-#                 null_distribution = np.array(permutation_results[roi][sigma])
-                
-#                 # Calculate mean and std of null distribution
-#                 mean_r = np.mean(null_distribution)
-#                 std_r = np.std(null_distribution)
-                
-#                 mean_correlations.append(mean_r)
-#                 std_correlations.append(std_r)
-        
-#         if sigmas_with_data:
-#             sigmas_array = np.array(sigmas_with_data)
-#             mean_array = np.array(mean_correlations)
-#             std_array = np.array(std_correlations)
-            
-#             # Plot the mean line
-#             plt.plot(sigmas_array, mean_array, '-', 
-#                     color=colors[i], label=f'{roi}', linewidth=2)
-            
-#             # Add shaded area for variance (mean ± std)
-#             plt.fill_between(sigmas_array, 
-#                            mean_array - std_array, 
-#                            mean_array + std_array,
-#                            color=colors[i], alpha=0.2)
-    
-#     plt.xlabel('Sigma Value')
-#     plt.ylabel('Pearson Correlation (Null Distribution)')
-#     plt.title('Null Distribution Mean ± SD for Each ROI Across Sigmas')
-#     plt.xticks(range(lower, upper + 1))
-#     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-#     plt.grid(True, alpha=0.3)
-#     plt.tight_layout()
-#     plt.savefig(results_dir / data_dir / f'{lower}_{upper}_{step}_null_distribution_avg_and_std.png', 
-#     dpi=300, bbox_inches='tight')
-#     plt.show()
-
-
 
 ##################################
 # P-value and correlation heatmaps 

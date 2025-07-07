@@ -12,8 +12,8 @@ from sklearn.linear_model import HuberRegressor
 from matplotlib.ticker import FormatStrFormatter
 import tqdm as tqdm
 
-dataset_root = Path("D:/Documents/DRAC/TC2See/data")
-results_dir = Path("D:/Documents/DRAC/TC2See/results")
+dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
+results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 sigma_val = 5
 rdm_dist = "correlation"
 correlation_type = "spearman"
@@ -36,6 +36,7 @@ permutation_results_p = {roi: [] for roi in ROIs}
 # Load expertise scores
 with open(dataset_root / "participant_quiz_scores.json", 'r') as f:
     expertise_scores = json.load(f)
+
 subjects = list(expertise_scores.keys())
 expertise_scores_values = list(expertise_scores.values())
 
