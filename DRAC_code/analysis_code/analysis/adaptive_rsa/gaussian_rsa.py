@@ -10,23 +10,30 @@ import traceback
 from sklearn.linear_model import HuberRegressor
 from matplotlib.ticker import FormatStrFormatter
 
+
 dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 rdm_dist = "correlation"
-version = "no_sub_8_" # "" or "no_sub_8_"
+version = "pred_embed_" # "" or "no_sub_8_"
 
 sigma = 5  # Gaussian decay parameter 
-sigma_dir = results_dir / f'gaussian/gaussian_sigma_{sigma}'
+sigma_dir = results_dir / f'gaussian_rsa/sigma_{sigma}'
 sigma_dir.mkdir(parents=True, exist_ok=True)
 
+# Load ROI name mapping
+with open(dataset_root / "roi_names.json", 'r') as f:
+    roi_names = json.load(f)
+
 ROIs = ["V1", "V2", "V3", "V4",  "V7", "V8", "LO1", "LO2", "PIT", "FFC", "VVC", "A1", "Pir"]
-if version == "":
-    all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16', '17', 
+# ROIs = [roi_names[str(i)] for i in range(1, 181)]
+# ROIs = ["24dd", "24dv", "p24", "p24pr", "p32", "a32pr", "s32", "d32", "p32pr", "33pr"]
+    
+if version == "no_sub_8_":
+    all_subjects = ['05', '06', '07', '09', '10', '11', '12', '14', '15', '16', '17', 
                     '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
                     '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']
-    
-elif version == "no_sub_8_":
-    all_subjects = ['05', '06', '07', '09', '10', '11', '12', '14', '15', '16', '17', 
+else:
+    all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16', '17', 
                     '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', 
                     '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']
 
@@ -41,8 +48,12 @@ RDM_dict = {subject: {} for subject in all_subjects}
 for subject in all_subjects:
     try:
         for ROI in ROIs:
-            rdm_path = dataset_root / f"processed/glm_RDMs/{rdm_dist}/sub_{subject}" / ROI
-            rdm_file_path = rdm_path / f'rdm_for_{ROI}.hdf5'
+            if version == "pred_embed_":
+                rdm_path = dataset_root / f"processed/predicted_embeddings_RDMs/individual/sub_{subject}/experiment-8.4/ViT-B=16-features_large"
+                rdm_file_path = rdm_path / f'{ROI}.hdf5'
+            else:
+                rdm_path = dataset_root / f"processed/glm_RDMs/{rdm_dist}/sub_{subject}" / ROI
+                rdm_file_path = rdm_path / f'rdm_for_{ROI}.hdf5'
             
             rdm = rsatoolbox.rdm.rdms.load_rdm(rdm_file_path, file_type='hdf5')
             RDM_dict[subject][ROI] = rdm
@@ -95,7 +106,6 @@ for ROI in ROIs:
                 
                 raw_weights.append(raw_weight)
                 correlations.append(corr_value.item())
-            
 
             # Normalize weights so they sum to 1
             total_weight = sum(raw_weights)
@@ -142,18 +152,20 @@ _, corrected_p_values_spearman, _, _ = multipletests(results_df['spearman_p'], m
 results_df['spearman_p_corrected'] = corrected_p_values_spearman
 
 
+
 ########################################
 # Save results for use in other analyses
 ########################################
+
 # Save similar_expertise_correlation_results as a JSON file
-with open(sigma_dir / f'{version}sigma_{sigma}_expertise_vs_rsa_correlation_similarity.json', 'w') as f:
+with open(sigma_dir / f'data/{version}sigma_{sigma}_expertise_vs_rsa_correlation_similarity.json', 'w') as f:
     json.dump(expertise_vs_rsa_correlation_similarity, f)
     
 # Save results_df as a parquet file
-results_df.to_parquet(sigma_dir / f'{version}sigma_{sigma}_results_df.parquet', index=False)
+results_df.to_parquet(sigma_dir / f'data/{version}sigma_{sigma}_results_df.parquet', index=False)
 
 # Save the subject_similarity_correlations dictionary as a JSON file
-with open(sigma_dir / f'{version}sigma_{sigma}_adaptive_subgroup_rsa_results.json', 'w') as f:
+with open(sigma_dir / f'data/{version}sigma_{sigma}_adaptive_subgroup_rsa_results.json', 'w') as f:
     json.dump(adaptive_subgroup_rsa_results, f)
 
 
@@ -161,25 +173,27 @@ with open(sigma_dir / f'{version}sigma_{sigma}_adaptive_subgroup_rsa_results.jso
 ##########################################################################################
 # Plot correlation between expertise scores and similarity-based correlations for top ROIs
 ##########################################################################################
-    
+
 for corr_type in ["pearson", "spearman"]:
     rois_sorted_by_p = results_df['ROI'].tolist()
 
-
-    plt.figure(figsize=(21, 12)) 
+    plt.figure(figsize=(20, 12)) # 13 
+    # plt.figure(figsize=(20, 8)) # 10
     for i, roi in enumerate(rois_sorted_by_p):
         valid_subjects = list(adaptive_subgroup_rsa_results[roi].keys())
         x = [expertise_scores[subject] for subject in valid_subjects]
         y = [adaptive_subgroup_rsa_results[roi][subject] for subject in valid_subjects]
         
         # Plot scatter with regression line
-        plt.subplot(3, 5, i+1)
+        plt.subplot(3, 5, i + 1) # 13
+        # plt.subplot(2, 5, i + 1) # 10
         plt.scatter(x, y, alpha=0.7)
         
-        slope, intercept, r_value, p_value, std_err = linregress(x, y)
-        x_line = np.linspace(min(x), max(x), 100)
-        y_line = slope * x_line + intercept
-        plt.plot(x_line, y_line, 'r-')
+        if corr_type == "pearson":
+            slope, intercept, r_value, p_value, std_err = linregress(x, y)
+            x_line = np.linspace(min(x), max(x), 100)
+            y_line = slope * x_line + intercept
+            plt.plot(x_line, y_line, 'r-')
 
         plt.ylim(-0.02, 0.37)
         plt.xlim(35, 90)
@@ -189,12 +203,51 @@ for corr_type in ["pearson", "spearman"]:
                 f'r = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_r"]:.3f}\np = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_p"]:.3f}\np_adj = {results_df.loc[results_df["ROI"] == roi, f"{corr_type}_p_corrected"].values[0]:.3f}',  
                 transform=plt.gca().transAxes, verticalalignment='top')
         plt.xlabel('Expertise Score')
-        plt.ylabel(f'Weighted Avg RDM Correlation ({corr_type})')
+        plt.ylabel(f'Proximity Aware Correlation ({corr_type})')
         plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
 
-    plt.suptitle(f'Expertise vs Weighted Average RDM Correlation\n(Gaussian σ = {sigma})', 
-                fontsize=16, fontweight='bold', y=0.98)
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.92)  
-    print(f"Saving plot to {str(sigma_dir)}" + "\\" + f"{corr_type}_{version}sigma_{sigma}_scatters.png")
-    plt.savefig(sigma_dir / f'{corr_type}_{version}sigma_{sigma}_scatters.png', dpi=300)
+    plt.suptitle(f'Expertise vs Proximity Aware Correlation\n(Gaussian σ = {sigma})',
+             fontsize=16, fontweight='bold', y=.98)
+    plt.tight_layout(h_pad=2.0, w_pad=2.0)
+    plt.subplots_adjust(top=0.85) 
+    print(f"Saving plot to {str(sigma_dir)}" + "\\" + f"visuals/scatters/{corr_type}_{version}sigma_{sigma}_scatters.png")
+    plt.savefig(sigma_dir / f'visuals/scatters/{corr_type}_{version}sigma_{sigma}_scatters.png', dpi=300, bbox_inches=None)
+
+
+# for corr_type in ["pearson", "spearman"]:
+#     rois_sorted_by_p = results_df['ROI'].tolist()
+#     individual_plot_dir = sigma_dir / f'visuals/scatters/individual_plots/{corr_type}'
+#     individual_plot_dir.mkdir(parents=True, exist_ok=True)
+
+#     for roi in rois_sorted_by_p:
+#         valid_subjects = list(adaptive_subgroup_rsa_results[roi].keys())
+#         x = [expertise_scores[subject] for subject in valid_subjects]
+#         y = [adaptive_subgroup_rsa_results[roi][subject] for subject in valid_subjects]
+
+#         plt.figure(figsize=(6, 5))
+#         plt.scatter(x, y, alpha=0.7)
+
+#         if corr_type == "pearson":
+#             slope, intercept, r_value, p_value, std_err = linregress(x, y)
+#             x_line = np.linspace(min(x), max(x), 100)
+#             y_line = slope * x_line + intercept
+#             plt.plot(x_line, y_line, 'r-')
+
+#         plt.ylim(-0.02, 0.37)
+#         plt.xlim(35, 90)
+#         plt.title(f'ROI {roi}')
+#         plt.text(0.05, 0.95, 
+#                  f'r = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_r"]:.3f}\n'
+#                  f'p = {expertise_vs_rsa_correlation_similarity[roi][f"{corr_type}_p"]:.3f}\n'
+#                  f'p_adj = {results_df.loc[results_df["ROI"] == roi, f"{corr_type}_p_corrected"].values[0]:.3f}',  
+#                  transform=plt.gca().transAxes, verticalalignment='top')
+#         plt.xlabel('Expertise Score')
+#         plt.ylabel(f'Proximity Aware Correlation ({corr_type})')
+#         plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+
+#         filename = f'{roi}_{corr_type}_{version}sigma_{sigma}.png'
+#         save_path = individual_plot_dir / filename
+#         print(f"Saving individual plot to {save_path}")
+#         plt.tight_layout()
+#         plt.savefig(save_path, dpi=300)
+#         plt.close()

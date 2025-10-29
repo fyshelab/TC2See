@@ -10,21 +10,21 @@ import json
 import pandas as pd
 
 
-patch_size = 32
-stride = 16
+patch_size = 67
+stride = 33
 
-plot_dir = Path(f"/home/jamesmck/projects/def-afyshe-ab/jamesmck/TC2See/DRAC_code/data/occlusion_violin_plots/violins_size_{patch_size}")
+plot_dir = Path(f"/home/jamesmck/projects/def-afyshe-ab/jamesmck/TC2See/DRAC_code/data/occlusion_plots/size_{patch_size}")
 embeddings_stats_file = plot_dir / f"occ_{patch_size}x_{patch_size}_image_embeddings_stats.json"
+image_folder = Path("/home/jamesmck/projects/def-afyshe-ab/jamesmck/TC2See/DRAC_code/data/bird_images")
+image_paths = sorted(image_folder.glob("*.png"))[0:10]
+
 # load the embeddings stats
 with open(embeddings_stats_file, "r") as f:
     embeddings_stats = json.load(f)
 embedding_stats_DF = pd.DataFrame(embeddings_stats)
 
-image_folder = Path("/home/jamesmck/projects/def-afyshe-ab/jamesmck/TC2See/DRAC_code/data/cropped")
-image_paths = sorted(image_folder.glob("*.png"))[0:10]
 
-def apply_occlusion(image, mask_size=patch_size, stride=stride):
-    """Apply a sliding window occlusion to an image. (bird images are 335x335)"""
+def apply_occlusion(image):
     H, W, C = image.shape
     occluded_images = []
     

@@ -1,41 +1,43 @@
 #!/bin/bash
-#SBATCH --time=13:00:00
+#SBATCH --time=20:00:00
 #SBATCH --account=def-afyshe-ab
-#SBATCH  -n 1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=16G
+#SBATCH --mem=40G
 #SBATCH --mail-user=jam10@ualberta.ca
-#SBATCH --mail-type=BEGIN
-#SBATCH --mail-type=END
-#SBATCH --mail-type=FAIL
-#SBATCH --mail-type=REQUEUE
 #SBATCH --mail-type=ALL
+#SBATCH --array=0
 
+# Get the participant from the array
+PARTICIPANTS=("10")
+# PARTICIPANTS=("05" "06" "07" "08" "09" "10" "11" "12" "14" "15" "16" "17" "18" 
+#               "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" 
+#               "32" "33" "34" "35" "36" "37" "38" "39" "40")
+
+
+sub_num=${PARTICIPANTS[$SLURM_ARRAY_TASK_ID]}
+ 
 cd
 module load apptainer
 
-project=~/projects/def-afyshe-ab/jamesmck/bird_data_analysis
-sub_num="31"
+project=~/projects/def-afyshe-ab/jamesmck/TC2See/DRAC_code
+shared_data_dir=~/projects/def-afyshe-ab/TC2See
 
-# Extract zipped BOLD data to temp directory
-cp -r ${project}/data/raw_data/bids_data $SLURM_TMPDIR/
-# Places fmri_processing directory in SLURM_TMPDIR
-# tar -xzf $SLURM_TMPDIR/sub_${sub_num}.tar.gz -C $SLURM_TMPDIR/
+cp -r ${shared_data_dir} $SLURM_TMPDIR/
 
 # Create directories for fMRIprep to access at runtime
 mkdir $SLURM_TMPDIR/work_dir
-mkdir $SLURM_TMPDIR/sub_${sub_num}_out
+mkdir $SLURM_TMPDIR/sub-${sub_num}
 mkdir $SLURM_TMPDIR/image
 mkdir $SLURM_TMPDIR/license
 
 # Required fMRIprep files
-cp ${project}/fMRI_prep/fmriprep_24.0.0.sif $SLURM_TMPDIR/image
-cp ${project}/fMRI_prep/license.txt $SLURM_TMPDIR/license
+cp ${project}/data_preprocessing/fMRI_prep/fmriprep_24.0.0.sif $SLURM_TMPDIR/image
+cp ${project}/data_preprocessing/fMRI_prep/license.txt $SLURM_TMPDIR/license
 
 
 apptainer run  --cleanenv \
--B $SLURM_TMPDIR/bids_data:/raw \
--B $SLURM_TMPDIR/sub_${sub_num}_out:/output \
+-B $SLURM_TMPDIR/TC2See/bids_data_2/TC2See:/raw \
+-B $SLURM_TMPDIR/sub-${sub_num}:/output \
 -B $SLURM_TMPDIR/work_dir:/work_dir \
 -B $SLURM_TMPDIR/image:/image \
 -B $SLURM_TMPDIR/license:/license \
@@ -47,8 +49,5 @@ $SLURM_TMPDIR/image/fmriprep_24.0.0.sif \
 --output-spaces fsaverage \
 --stop-on-first-crash
 
-# Zip processed output
-tar -czf $SLURM_TMPDIR/sub_${sub_num}_out.tar.gz -C $SLURM_TMPDIR sub_${sub_num}_out
-# Copy back to project
-cp $SLURM_TMPDIR/sub_${sub_num}_out.tar.gz ${project}/data/processed/fmriprep_surfs
 
+cp -r $SLURM_TMPDIR/sub-${sub_num} ${shared_data_dir}/fmri_prep_surfs/

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import h5py
+import traceback
 
 import nibabel as nib
 from nilearn import surface
@@ -15,32 +16,35 @@ from bids import BIDSLayout
 
 from tc2see import load_data
 
-
-dataset_root = Path('../../data')
+shared_data_dir = Path(os.path.expanduser('~/projects/def-afyshe-ab/TC2See'))
+data_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 
 tc2see_version = 3 
-derivatives_path = dataset_root / 'processed/fmriprep_surfs'
+derivatives_path = shared_data_dir / 'fmri_prep_surfs'
 num_runs = 6 if tc2see_version in (1, 3) else 8
 
 # Initialize BIDSLayouts for querying files.
-dataset_layout = BIDSLayout(dataset_root / 'raw_data/bids_data')
+dataset_layout = BIDSLayout(shared_data_dir / 'bids_data/TC2See')
 derivatives_layout = BIDSLayout(derivatives_path, derivatives=True, validate = False)
 
 task = "bird"
 space = 'fsaverage' 
-subjects = ['40']
+subjects = ["10"] 
+# subjects = ["05", "06", "07", "08", "09", "10", "11", "12", "14", "15", "16", "17", "18", "19",
+#             "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", 
+#             "34", "35", "36", "37", "38", "39", "40"] 
+
 tr = 2. # 1.97  # TR duration (in seconds)
-mask_dilations = 3  # Number of dilation iterations for the brain mask
 num_stimuli = 75 # 112  # Total number of different stimuli
 
 # Load stimulus images and create a mapping of stimulus names to unique identifiers
-stimulus_images = h5py.File(dataset_root / 'stimulus-images.hdf5', 'r')
+stimulus_images = h5py.File(data_root / 'stimulus-images.hdf5', 'r')
 stimulus_id_map = {name: i for i, name in enumerate(stimulus_images.attrs['stimulus_names'])}
  
 new_or_append = 'a' # Use 'a' for append/overwrite, 'w' for new hdf5 file
            
 # Create or append to an HDF5 file to store preprocessed fMRI data
-with h5py.File(dataset_root / f'processed/hdf5s/tc2see-v{tc2see_version}-fsaverage-surfs-sub_40.hdf5', new_or_append) as f:
+with h5py.File(shared_data_dir / f'hdf5s/tc2see-fsaverage-surfs.hdf5', new_or_append) as f:
     for subject in tqdm(subjects):
         if f'sub-{subject}' not in list(f.keys()):
             try:
@@ -134,7 +138,8 @@ with h5py.File(dataset_root / f'processed/hdf5s/tc2see-v{tc2see_version}-fsavera
                     group['stimulus_ids'][run_id] = stimulus_ids
                 
             except Exception as e:
-                print(f"Error processing {subject}: {e}")
+                print(f"Error processing {subject}: \n")
+                traceback.print_exc()
                 del f[f'sub-{subject}']
                 continue
         else:

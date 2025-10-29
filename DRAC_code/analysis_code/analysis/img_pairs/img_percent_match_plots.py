@@ -19,7 +19,9 @@ dataset_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 ROI_group = "all" # v1-v4_Cntrl or all
-full_y = ""
+full_y = "" # "_y_full" or ""
+x_u_lim = 10000 # Upper limit for x-axis on charts, or "no_x_lim"
+results = {}
 
 if ROI_group == "v1-v4_Cntrl":
     ROIs = ["V1", "V2", "V3", "V4", "A1", "Pir"] 
@@ -29,9 +31,6 @@ else:
     ROIs = []
 
 img_variables = [('_Head_Direction', 'head direction'), ('_Species', 'species'), ('_Sub_Species', 'sub species'), ('_Branches', 'branches'), ('_Leaves', 'leaves'), ('_Grass', 'grass'), ('_Bg_Focused', 'bg focused'), ('_Beak_Open', 'beak open')]
-
-x_u_lim = 10000 # Upper limit for x-axis on charts, or "no_x_lim"
-results = {}
 
 # Directory to save statistics
 stats_dir = results_dir / "dissimilarity_stats"

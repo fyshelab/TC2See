@@ -10,9 +10,8 @@ results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 
 rdm_dist = "correlation"
 sigma_val = 5
-corr = 'gaussian'
 added_description = "_no_sub_8" # "_no_sub_8"
-data_dir = results_dir / f"{corr}/{sigma_val}"
+data_dir = results_dir / f"gaussian_rsa/sigma_{sigma_val}/data"
 data_dir.mkdir(parents=True, exist_ok=True)
 
 ROIs = ["V1", "V2", "V3", "V4",  "V7", "V8", "LO1", "LO2", "PIT", "FFC", "VVC", "A1", "Pir"]
@@ -132,7 +131,7 @@ for ROI in ROIs:
 
 
 # Save threshold_results dict as JSON
-sigmas_results_path = results_dir / data_dir / f'{sigma_val}{added_description}_{corr}_range_results.json'
+sigmas_results_path = data_dir / f'sigma_{sigma_val}{added_description}_corr_and_p_for_each_ROI.json'
 
 with open(sigmas_results_path, 'w') as f:
     json.dump(sigma_results, f, indent=4)

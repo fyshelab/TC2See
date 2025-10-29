@@ -17,15 +17,15 @@ if not dir1 in sys.path:
 
 from tc2see import load_data
 
-dataset_root = os.path.expanduser('~/projects/def-afyshe-ab/TC2See')
-james_root = Path(__file__).parent.parent.parent.parent.parent
+shared_data_dir = os.path.expanduser('~/projects/def-afyshe-ab/TC2See')
+data_root = Path("/project/6029407/jamesmck/TC2See/DRAC_code/data")
 
 tc2see_version = 3 
-derivatives_path = dataset_root + '/fmri_prep_vols_v2'
+derivatives_path = shared_data_dir + '/fmri_prep_vols_v2'
 num_runs = 6 if tc2see_version in (1, 3) else 8
 
 # Initialize BIDSLayouts for querying files.
-dataset_layout = BIDSLayout(dataset_root + '/bids_data/TC2See')
+dataset_layout = BIDSLayout(shared_data_dir + '/bids_data/TC2See')
 derivatives_layout = BIDSLayout(derivatives_path, derivatives=True, validate = False)
 
 task = "bird"
@@ -41,11 +41,11 @@ num_stimuli = 75 #112  # Total number of different stimuli
 # num_trs = 236 #231 #229  # Total number of TRs in the fMRI data
 
 # Load stimulus images and create a mapping of stimulus names to unique identifiers
-stimulus_images = h5py.File(james_root / 'stimulus-images.hdf5', 'r')
+stimulus_images = h5py.File(data_root / 'stimulus-images.hdf5', 'r')
 stimulus_id_map = {name: i for i, name in enumerate(stimulus_images.attrs['stimulus_names'])}
 
 # Create an HDF5 file to store preprocessed fMRI data
-with h5py.File(f'{dataset_root}/tc2see-v3-bold.hdf5', 'a') as f:
+with h5py.File(f'{shared_data_dir}/tc2see-v3-bold_no_mask.hdf5', 'w') as f:
     for sub in subjects:
         if f'sub-{sub}' not in list(f.keys()):
             try:
@@ -101,7 +101,10 @@ with h5py.File(f'{dataset_root}/tc2see-v3-bold.hdf5', 'a') as f:
                     bids_image = bids_image[0]
                     
                     bold = bids_image.get_image().get_fdata()
-                    bold = bold[fmri_mask].T  # Extract the relevant voxels
+                    print(f"Processing subject {sub}, with shape {bold.shape}")
+                    raise
+                    # bold = bold[fmri_mask].T  # Extract the relevant voxels
+                    bold = bold.T  # Extract the relevant voxels
                     num_trs_run = bold.shape[0]
                     trend_coeffs = np.stack([np.arange(num_trs_run), np.ones(shape=num_trs_run)], axis=1)
                     

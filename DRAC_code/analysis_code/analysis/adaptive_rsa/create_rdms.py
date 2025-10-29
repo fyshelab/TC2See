@@ -22,40 +22,28 @@ all_subjects = ['05', '06', '07', '08', '09', '10', '11', '12', '14', '15', '16'
 
 
 for subject in all_subjects:
-
     RDM_path = dataset_root / f"processed/glm_RDMs/{rdm_dist}/sub_{subject}"
 
-    if  RDM_path.exists():  #### not
+    if  RDM_path.exists():  #### change back to not RDM_path.exists() ####
         print(f"Creating RDMs for subject {subject}")
         for ROI in ROIs:
-            try:
+            # try:
                 roi_path = dataset_root / f"processed/glm_roi_representations/sub_{subject}" / ROI
                 rdm_roi_path = RDM_path / ROI
                 rdm_file_path = rdm_roi_path / f'rdm_for_{ROI}.hdf5'
                 
                 rdm_roi_path.mkdir(parents=True, exist_ok=True)
                 sub_roi_data = pd.read_parquet(roi_path / f'reps_for_{ROI}.parquet')
-
-                if sub_roi_data.isna().any().any():
-                    print(ROI)
-
-                # if ROI == "4":
-                #     print( np.min(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy()))
-                #     print("\n\n")
-                #     print(f"Data shape: {sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy().shape}")
-                #     print(f"Data variance per voxel: {np.var(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy(), axis=0)}")
-                #     print(f"Number of zero-variance voxels: {np.sum(np.var(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy(), axis=0) == 0)}")
-                #     print(f"Data range: {np.min(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy())} to {np.max(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy())}")
-                #     print(f"All values identical: {np.all(sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy() == sub_roi_data.copy().drop(columns=['stimulus_id', 'stimulus_category']).to_numpy()[0,0])}")
                 
                 # Stimulus IDs are sorted at this point, so we can use them in rdm correlations
                 if avg_duplicates:
                     sub_roi_data['stimulus_category'] = sub_roi_data['stimulus_category'].apply(lambda x: 1 if x == "Sparrow" else 2)
                     sub_roi_data = sub_roi_data.groupby('stimulus_id').mean().reset_index()
                     sub_roi_data['stimulus_category'] = sub_roi_data['stimulus_category'].apply(lambda x: "Sparrow" if x == 1 else "Warbler")
-                
+            
                 stim_category = list(sub_roi_data['stimulus_category'])
                 stim_ids = list(sub_roi_data['stimulus_id'])
+
                 sub_roi_data = sub_roi_data.drop(columns=['stimulus_id', 'stimulus_category'])
                 
                 data = rsatoolbox.data.Dataset(
@@ -64,15 +52,13 @@ for subject in all_subjects:
                 )
                 rdm = rsatoolbox.rdm.calc_rdm(data, method='correlation')
                 rdm_matrix = rdm.get_matrices()[0] 
-                # if ROI == "4":
-                #     print(sub_roi_data.to_numpy())
-                #     print(rdm_matrix)
+
                 rdm_df = pd.DataFrame(rdm_matrix, index=data.obs_descriptors["stim_ids"], columns=data.obs_descriptors["stim_ids"])
                 
                 # rdm.save(rdm_file_path, file_type='hdf5', overwrite=True)
 
-            except Exception as e:
-                print(f"Error creating RDM for subject {subject}, ROI: {ROI}\n")
-                traceback.print_exc()
-                print("\n\n")
-                continue
+            # except Exception as e:
+            #     print(f"Error creating RDM for subject {subject}, ROI: {ROI}\n")
+            #     traceback.print_exc()
+            #     print("\n\n")
+            #     continue

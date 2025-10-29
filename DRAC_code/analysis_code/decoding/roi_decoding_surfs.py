@@ -98,7 +98,7 @@ for subj in tqdm(subjs):
         _, stimulus_ids = load_data(
             f'../../data/processed/hdf5s/tc2see-v{tc2see_version}-fsaverage-surfs.hdf5', 
             subject,
-            tr_offset=6 / tr,
+            tr_offset= num_runs / tr,
             run_normalize='linear_trend',
             interpolation=False,
         )

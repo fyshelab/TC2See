@@ -10,9 +10,12 @@ import h5py
 
 device = "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
+mask_type = "fg"
+model_name = 'ViT-B=32'
+hdf5_file_path = f'../../data/{model_name}-features_bg_mask.hdf5'
 
 embeddings = []
-for filename in sorted(glob.glob("../../data/masked_images/*.png")):
+for filename in sorted(glob.glob(f"../../data/{mask_type}_mask_images/*.png")):
 
     if "hash" in filename:
         continue
@@ -28,14 +31,10 @@ for filename in sorted(glob.glob("../../data/masked_images/*.png")):
     image_features = image_features.cpu().numpy()
     embeddings.append(image_features[0]) 
 
+
 embeddings_matrix = np.stack(embeddings, axis=0)
 
-model_name = 'ViT-B=32'
-embedding_name = 'embedding'
-
-hdf5_file_path = f'../../data/{model_name}-features_bg_mask.hdf5'
-
 with h5py.File(hdf5_file_path, 'w') as f:
-    f.create_dataset(embedding_name, data=embeddings_matrix)
+    f.create_dataset('embedding', data=embeddings_matrix)
 
 print(f"Embeddings saved to {hdf5_file_path}")
