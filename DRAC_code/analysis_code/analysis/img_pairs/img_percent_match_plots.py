@@ -21,7 +21,6 @@ results_dir = Path("/project/6029407/jamesmck/TC2See/DRAC_code/results")
 ROI_group = "all" # v1-v4_Cntrl or all
 full_y = "" # "_y_full" or ""
 x_u_lim = 10000 # Upper limit for x-axis on charts, or "no_x_lim"
-results = {}
 
 if ROI_group == "v1-v4_Cntrl":
     ROIs = ["V1", "V2", "V3", "V4", "A1", "Pir"] 
@@ -32,24 +31,18 @@ else:
 
 img_variables = [('_Head_Direction', 'head direction'), ('_Species', 'species'), ('_Sub_Species', 'sub species'), ('_Branches', 'branches'), ('_Leaves', 'leaves'), ('_Grass', 'grass'), ('_Bg_Focused', 'bg focused'), ('_Beak_Open', 'beak open')]
 
-# Directory to save statistics
-stats_dir = results_dir / "dissimilarity_stats"
-stats_dir.mkdir(parents=True, exist_ok=True)
-
 for im_var, im_var_name in img_variables:
     im_var_dir = results_dir / f"img_pair_plots/var_match_lines/{im_var}"
     im_var_dir.mkdir(parents=True, exist_ok=True)
 
     for version in ["top_5", "low_high", "top_5_avg_tie", "top_5_new"]:
         print(f"\n\n========== ({im_var_name}) Version: {version} ==========")
-        results[version] = {} 
         percent_series_low = {}
         percent_series_high = {}
 
         stats_rows = []
 
         for ROI in ROIs:
-            results[version][ROI] = {}
 
             roi_results_dir = results_dir / f"img_pair_DFs/{ROI}/{version}"
             low_exp_DF = pd.read_parquet(roi_results_dir / f'low_exp_DF.parquet')
@@ -80,35 +73,9 @@ for im_var, im_var_name in img_variables:
             idx = pd.RangeIndex(1, n_high + 1)
             percent_series_high[ROI] = (cum_high / idx) * 100
 
-            # truncate for top 100 dissimilarities for existing mean/var calculations
-            low_exp_DF_head = low_exp_DF_trunc.head(100)
-            high_exp_DF_head = high_exp_DF_trunc.head(100)
-
-            # Store mean/var for your results dict
-            results[version][ROI]['mean_low_exp_dissimilarity'] = low_exp_DF_head['dissimilarity'].mean()
-            results[version][ROI]['mean_high_exp_dissimilarity'] = high_exp_DF_head['dissimilarity'].mean()
-            results[version][ROI]['var_low_exp_dissimilarity'] = low_exp_DF_head['dissimilarity'].var()
-            results[version][ROI]['var_high_exp_dissimilarity'] = high_exp_DF_head['dissimilarity'].var()
-
-            # --- Compute statistics for CSV using truncated data (up to x_u_lim) ---
-            stats_row = {
-                "ROI": ROI,
-                "mean_low_exp": low_exp_DF_trunc['dissimilarity'].mean(),
-                "std_low_exp": low_exp_DF_trunc['dissimilarity'].std(),
-                "var_low_exp": low_exp_DF_trunc['dissimilarity'].var(),
-                "mean_high_exp": high_exp_DF_trunc['dissimilarity'].mean(),
-                "std_high_exp": high_exp_DF_trunc['dissimilarity'].std(),
-                "var_high_exp": high_exp_DF_trunc['dissimilarity'].var()
-            }
-            stats_rows.append(stats_row)
-
-        # Save CSV for this img_variable and version
-        csv_path = stats_dir / f"{ROI_group}_dissimilarity_stats_{im_var}_{version}_{x_u_lim}.csv"
-        pd.DataFrame(stats_rows).to_csv(csv_path, index=False)
-
 
         def plot_percent_series(series_dict, title, save_path=None, step=100, x_u_lim="no_x_lim", is_difference=False):
-            # Create line plot for series in series_dict.
+            # Create line plot for series in series_dict
             plt.figure(figsize=(10, 6))
 
             color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -118,8 +85,6 @@ for im_var, im_var_name in img_variables:
             n_styles = len(linestyles)
 
             for i, (roi, series) in enumerate(series_dict.items()):
-                if series is None or series.empty:
-                    continue
                 # Subsample points to reduce plot resolution
                 series_sub = series.iloc[::step]
                 x = series_sub.index + 1
@@ -137,8 +102,7 @@ for im_var, im_var_name in img_variables:
 
             if is_difference:
                 plt.ylabel(f"Difference in percent same {im_var_name} (High - Low)")
-                # set y-limits based on data range with margin if possible
-                all_vals = pd.concat([s.dropna() for s in series_dict.values() if s is not None and not s.empty]) if series_dict else pd.Series(dtype=float)
+                all_vals = pd.concat([s.dropna() for s in series_dict.values()]) 
                 if not all_vals.empty:
                     vmin, vmax = all_vals.min(), all_vals.max()
                     margin = max(1.0, 0.1 * max(abs(vmin), abs(vmax)))
@@ -175,7 +139,6 @@ for im_var, im_var_name in img_variables:
         else:
             version_text = "Top 5"
 
-        # --- existing calls for low and high (unchanged) ---
         plot_percent_series(
             percent_series_low,
             f"Percent same {im_var_name} vs N Dissimilarities Used ({version_text} low group)",
@@ -198,15 +161,13 @@ for im_var, im_var_name in img_variables:
             s_low = percent_series_low.get(ROI)
             s_high = percent_series_high.get(ROI)
 
-            # align both series to the same index range (0..max_len-1)
-            len_low = len(s_low) if (s_low is not None) else 0
-            len_high = len(s_high) if (s_high is not None) else 0
+            len_low = len(s_low)
+            len_high = len(s_high)
             max_len = max(len_low, len_high)
 
             idx = pd.RangeIndex(0, max_len)
             s_low_re = s_low.reindex(idx) if s_low is not None else pd.Series(index=idx, dtype=float)
             s_high_re = s_high.reindex(idx) if s_high is not None else pd.Series(index=idx, dtype=float)
-            # compute difference (NaN will propagate where data is missing)
             percent_series_diff[ROI] = s_high_re - s_low_re
 
         # Plot the difference series (High - Low)

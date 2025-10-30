@@ -195,7 +195,6 @@ for ROI in ROIs:
     low_exp_DF = get_image_characteristics(low_expertise_subjects, low_expertise_u_tris, bird_img_annotations, bird_images)
     high_exp_DF = get_image_characteristics(high_expertise_subjects, high_expertise_u_tris, bird_img_annotations, bird_images)
 
-    # Save to parquet files in results dir ROI folders
     roi_results_dir = results_dir / f"img_pair_DFs/{ROI}/{version}"
     roi_results_dir.mkdir(parents=True, exist_ok=True)
     low_exp_DF.to_parquet(roi_results_dir / f'low_exp_DF.parquet', index=False)

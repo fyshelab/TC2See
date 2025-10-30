@@ -136,7 +136,7 @@ for im_var, im_var_name in img_variables:
     results[im_var] = {}
     im_var_column = im_var.replace("_", " ")
 
-    # model RDM: 0 for same attribute, 1 for different
+    # 0 for same attribute, 1 for different
     attribute = bird_img_annotations[im_var_column].astype(str).values
     equal_attributes = (attribute[:, None] == attribute[None, :])
     attribute_rdm = (~equal_attributes).astype(float)  # shape (n_images, n_images)
